@@ -1,6 +1,5 @@
 // Epic - большая задача, Subtask - подзадача
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class Epic extends Task {
     // епик всегда один - и он уникален
