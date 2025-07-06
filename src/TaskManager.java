@@ -93,9 +93,12 @@ public class TaskManager {
 
     public void removeAllSubTasks() {
         subTasks.clear();
+        for (Epic epic : epics.values()) {
+            epic.getSubTasks().clear(); // получаем айди подзадач и очищаем их
+            epic.setTasksStatus(TasksStatus.NEW);
+        }
     }
 
-    // следующим методом исправлю этот по аналогии с addEpicTask
     public void addSubTask(SubTask subTask) {
         subTask.setId(generateId());
         subTasks.put(subTask.getId(), subTask);
