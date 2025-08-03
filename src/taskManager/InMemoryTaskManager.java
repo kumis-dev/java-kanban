@@ -1,20 +1,25 @@
+package taskManager;
+
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Scanner;
+import java.util.List;
 
-public class TaskManager {
+public class InMemoryTaskManager implements TaskManager {
     // переменные не должны быть статическими
 
     // общие задачи
-    private HashMap<Integer, Task> tasks = new HashMap<>();
+    private final HashMap<Integer, Task> tasks = new HashMap<>();
     // эпики - главные задачи
-    private HashMap<Integer, Epic> epics = new HashMap<>();
+    private final HashMap<Integer, Epic> epics = new HashMap<>();
     // саб таски - подзадачи
-    private HashMap<Integer, SubTask> subTasks = new HashMap<>();
+    private final HashMap<Integer, SubTask> subTasks = new HashMap<>();
+
 
     // переменная счетчика будет только одна
     private int id = 1; // для всех задач общая
+    private final HistoryManager historyManager = Managers.getDefaultHistory();
 
+    @Override
     public void addTask(Task task) {
         // устанавливаем только что сгенерированный айди
         task.setId(generateId());
@@ -22,24 +27,24 @@ public class TaskManager {
         tasks.put(task.getId(), task);
     }
 
-    public Task getTask(int taskId) {
-        return tasks.get(taskId);
-    }
-
-    public ArrayList<Task> getAllTasks() {
+    @Override
+    public List<Task> getAllTasks() {
         return new ArrayList<>(tasks.values()); // передаем в ArrayList коллекцию значений HashMap tasks
     }
 
-    public ArrayList<Epic> getAllEpics() {
+    @Override
+    public List<Epic> getAllEpics() {
         return new ArrayList<>(epics.values()); // передаем в ArrayList коллекцию значений HashMap epics
     }
 
-    public ArrayList<SubTask> getAllSubTasks() {
+    @Override
+    public List<SubTask> getAllSubTasks() {
         return new ArrayList<>(subTasks.values()); // передаем в ArrayList коллекцию значений HashMap subTasks
     }
 
     // получение всех саб тасков определенного эпика
-    public ArrayList<SubTask> getEpicSubtasks(int epicId) {
+    @Override
+    public List<SubTask> getEpicSubtasks(int epicId) {
         Epic epic = epics.get(epicId);
         // здесь будем хранить сами саб таски эпика что получили
         ArrayList<SubTask> subTasks = new ArrayList<>(); // затеняем переменную класса на уровне выше - локальной
@@ -53,15 +58,17 @@ public class TaskManager {
         return subTasks;
     }
 
+    @Override
     public void removeTask(int taskId) {
-        if (tasks.containsKey(taskId))
-            tasks.remove(taskId);
+        tasks.remove(taskId);
     }
 
+    @Override
     public void removeAllTasks() {
         tasks.clear();
     }
 
+    @Override
     public void updateTask(Task task) {
         if (task != null)
             tasks.put(task.getId(), task);
@@ -69,11 +76,13 @@ public class TaskManager {
 
     // сама логика внесения задач
     // методы не должны передаваться статически и туда передается именно сам обьект по тз
+    @Override
     public void addEpicTask(Epic epic) {
         epic.setId(generateId());
         epics.put(epic.getId(), epic);
     }
 
+    @Override
     public void removeEpicTask(int epicTaskId) {
         Epic epic = epics.get(epicTaskId); // получаем кокретный эпик, чтобы удалить и все его саб таски
         if (epic != null) {
@@ -86,11 +95,13 @@ public class TaskManager {
         }
     }
 
+    @Override
     public void removeAllEpics() {
         subTasks.clear();
         epics.clear();
     }
 
+    @Override
     public void removeAllSubTasks() {
         subTasks.clear();
         for (Epic epic : epics.values()) {
@@ -99,7 +110,11 @@ public class TaskManager {
         }
     }
 
+    @Override
     public void addSubTask(SubTask subTask) {
+        if (subTask.getId() == subTask.getEpicId()) {
+            return; // нельзя добавить подзадачу саму в себя
+        }
         subTask.setId(generateId());
         subTasks.put(subTask.getId(), subTask);
         // получаем айди эпика, к которому привязан саб таск
@@ -111,8 +126,10 @@ public class TaskManager {
         }
         ArrayList<Integer> subTasks = epic.getSubTasks();
         subTasks.add(subTask.getId()); // здесь уже добавим в список саб тасков нужный айди саб таска
+        epic.setTasksStatus(changeStatus(epicId));
     }
 
+    @Override
     public void removeSubTask(int subTaskId) {
         SubTask subTask = subTasks.get(subTaskId);
         if (subTask != null) {
@@ -126,11 +143,13 @@ public class TaskManager {
         }
     }
 
+    @Override
     public void updateEpic(Epic epic) {
         epics.put(epic.getId(), epic);
         epic.setTasksStatus(changeStatus(epic.getId())); // присваиваем статус эпику
     }
 
+    @Override
     public void updateSubTask(SubTask subTask) {
         subTasks.put(subTask.getId(), subTask);
         // исправлено: пересчитываем статус эпика
@@ -140,19 +159,43 @@ public class TaskManager {
         }
     }
 
-    public SubTask getSubTask(int subTaskId) {
-        return subTasks.get(subTaskId);
+    // логика добавления в историю будет в определенных геттерах
+    @Override
+    public Task getTask(int taskId) {
+        Task task = tasks.get(taskId);
+        if (task != null)
+            historyManager.addToHistory(task);
+        return task;
     }
 
-    public Epic getEpicTask(int epicTaskId) {
-        return epics.get(epicTaskId); // возвращаем обьект эпика по его id
+    @Override
+    public SubTask getSubTask(int subTaskId) {
+        SubTask subTask = subTasks.get(subTaskId);
+        if (subTask != null)
+            historyManager.addToHistory(subTask);
+        return subTask;
     }
+
+    @Override
+    public Epic getEpicTask(int epicTaskId) {
+        Epic epic = epics.get(epicTaskId);
+        if (epic != null)
+            historyManager.addToHistory(epic); // добавляем эпик в историю просмотров
+        return epic; // возвращаем обьект эпика по его id
+    }
+
+    public List<Task> getHistory() {
+        return historyManager.getHistory();
+    }
+
+
+
+
 
     // по сути не должно касаться пользователя напрямую, если сделать метод приватным
     // статус эпика зависит от всех подзадач сразу
     private TasksStatus changeStatus(int epicTaskId) {
         int newCount = 0;
-        int inProgressCount = 0;
         int doneCount = 0;
 
         Epic epic = epics.get(epicTaskId); // получаем обьект эпика
@@ -167,9 +210,11 @@ public class TaskManager {
             if (currentSubTask == null) continue;
             TasksStatus status = currentSubTask.getTasksStatus();
             switch (status) {
-                case NEW -> newCount++;
-                case IN_PROGRESS -> inProgressCount++;
-                case DONE -> doneCount++;
+                case TasksStatus.NEW -> newCount++;
+                case TasksStatus.IN_PROGRESS -> {
+
+                }
+                case TasksStatus.DONE -> doneCount++;
             }
         }
         if (subTasksIds.size() == newCount) {

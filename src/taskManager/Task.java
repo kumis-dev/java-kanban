@@ -1,4 +1,4 @@
-// этот класс мы реализуем для хранения только 1 задачи
+package taskManager;// этот класс мы реализуем для хранения только 1 задачи
 import java.util.Objects;
 
 public class Task {
@@ -56,7 +56,7 @@ public class Task {
 
     @Override
     public String toString() {
-        return "Task{" +
+        return "taskManager.Task{" +
                 "id=" + id +
                 ", nameTask='" + nameTask + '\'' +
                 ", description='" + description + '\'' +

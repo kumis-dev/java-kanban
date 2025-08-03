@@ -1,3 +1,5 @@
+package taskManager;
+
 public class SubTask extends Task {
     private int epicId;
     public SubTask(String nameTask, String description, int id, TasksStatus tasksStatus, int epicId) {
@@ -11,7 +13,7 @@ public class SubTask extends Task {
 
     @Override
     public String toString() {
-        return "SubTask{" +
+        return "taskManager.SubTask{" +
                 "epicId=" + getEpicId() + '\'' +
                 ", subTaskId=" + getId() + '\'' +
                 ", nameTask='" + getNameTask() + '\'' +
