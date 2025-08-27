@@ -61,6 +61,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeTask(int taskId) {
         tasks.remove(taskId);
+        historyManager.remove(taskId);
     }
 
     @Override
@@ -93,6 +94,7 @@ public class InMemoryTaskManager implements TaskManager {
             }
             epics.remove(epicTaskId);
         }
+        historyManager.remove(epicTaskId);
     }
 
     @Override
@@ -141,6 +143,7 @@ public class InMemoryTaskManager implements TaskManager {
             }
             subTasks.remove(subTaskId);
         }
+        historyManager.remove(subTaskId);
     }
 
     @Override
@@ -164,24 +167,43 @@ public class InMemoryTaskManager implements TaskManager {
     public Task getTask(int taskId) {
         Task task = tasks.get(taskId);
         if (task != null)
-            historyManager.addToHistory(task);
-        return task;
+            historyManager.add(task);
+        // возвращем копии тасков, чтобы таск менеджер не изменил свои задачи вместе с оригинальными
+        return new Task (
+                task.getNameTask(),
+                task.getDescription(),
+                task.getId(),
+                task.getTasksStatus()
+        );
     }
 
     @Override
     public SubTask getSubTask(int subTaskId) {
         SubTask subTask = subTasks.get(subTaskId);
         if (subTask != null)
-            historyManager.addToHistory(subTask);
-        return subTask;
+            historyManager.add(subTask);
+        // возвращем копии саб тасков, чтобы таск менеджер не изменил свои задачи вместе с оригинальными
+        return new SubTask (
+                subTask.getNameTask(),
+                subTask.getDescription(),
+                subTask.getId(),
+                subTask.getTasksStatus(),
+                subTask.getEpicId()
+        );
     }
 
     @Override
     public Epic getEpicTask(int epicTaskId) {
         Epic epic = epics.get(epicTaskId);
         if (epic != null)
-            historyManager.addToHistory(epic); // добавляем эпик в историю просмотров
-        return epic; // возвращаем обьект эпика по его id
+            historyManager.add(epic); // добавляем эпик в историю просмотров
+        // возвращем копии эпиков, чтобы таск менеджер не изменил свои задачи вместе с оригинальными
+        return new Epic(
+                epic.getNameTask(),
+                epic.getDescription(),
+                epic.getId(),
+                epic.getTasksStatus()
+        ); // возвращаем копию обьекта эпика по его id
     }
 
     @Override
