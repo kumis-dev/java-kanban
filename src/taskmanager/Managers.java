@@ -1,4 +1,4 @@
-package task_manager;
+package taskmanager;
 
 public class Managers {
     private Managers() {} // запрещаем создание объектов

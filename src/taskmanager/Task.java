@@ -1,4 +1,4 @@
-package task_manager;// этот класс мы реализуем для хранения только 1 задачи
+package taskmanager;// этот класс мы реализуем для хранения только 1 задачи
 import java.util.Objects;
 
 public class Task {
