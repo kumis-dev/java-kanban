@@ -169,7 +169,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (task != null)
             historyManager.add(task);
         // возвращем копии тасков, чтобы таск менеджер не изменил свои задачи вместе с оригинальными
-        return new Task (
+        return new Task(
                 task.getNameTask(),
                 task.getDescription(),
                 task.getId(),
@@ -183,7 +183,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (subTask != null)
             historyManager.add(subTask);
         // возвращем копии саб тасков, чтобы таск менеджер не изменил свои задачи вместе с оригинальными
-        return new SubTask (
+        return new SubTask(
                 subTask.getNameTask(),
                 subTask.getDescription(),
                 subTask.getId(),
