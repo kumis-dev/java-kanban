@@ -1,4 +1,4 @@
-package taskManager;
+package task_manager;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

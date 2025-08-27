@@ -1,7 +1,8 @@
-package taskManager;
+package task_manager;
 
 public class SubTask extends Task {
     private int epicId;
+
     public SubTask(String nameTask, String description, int id, TasksStatus tasksStatus, int epicId) {
         super(nameTask, description, id, tasksStatus);
         this.epicId = epicId;

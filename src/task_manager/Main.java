@@ -1,4 +1,4 @@
-package taskManager;
+package task_manager;
 
 // класс для реализации пользовательского сценария (доп тз)
 public class Main {
