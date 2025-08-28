@@ -1,7 +1,9 @@
-package taskManager;
+package taskmanager;
 
 public class Managers {
-    private Managers() {} // запрещаем создание объектов
+    private Managers() {
+
+    } // запрещаем создание объектов
 
     public static TaskManager getDefault() {
         return new InMemoryTaskManager();

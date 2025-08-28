@@ -1,7 +1,6 @@
-package taskManager;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import taskmanager.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -129,37 +128,26 @@ public class InMemoryTaskManagerTest {
 
     @Test
     public void shouldNotOverflowHistoryManager() {
+
+        for (Task task : createTasksArray(11)) {
+            taskManager.addTask(task);
+        }
+
+        taskManager.getTask(1); // вставили в конец (... 11 -> 1)
+        taskManager.getTask(2); // также (... 11 -> 1 -> 2)
+        taskManager.getTask(1); // 1) удаляем И 2) опять в конец 1) (... 11 -> 2) (... 11 -> 2-> 1)
+        taskManager.getTask(3); // (... 11 -> 2 -> 1 -> 3)
+        taskManager.getTask(2); // finally (4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 1 -> 3 -> 2)
+
         List<Task> historyTaskManager = taskManager.getHistory();
 
-        assertEquals(historyTaskManager.get(0).getId(), 2);
-        // первый элемент с id 1 удалился и поэтому заменится следующим
-        assertEquals(historyTaskManager.get(historyTaskManager.size() - 1).getId(), 11);
-        // последний элемент с id 11 должен был успешно добавить и удалить первый элемент с его id
-    }
-
-    @Test
-    public void shouldSavePreviousVersionHistoryManager() {
-        TaskManager taskManager = Managers.getDefault();
-        Task task1 = new Task("t1", "d1", 1, TasksStatus.NEW);
-        taskManager.addTask(task1);
-        taskManager.getTask(1);
-
-        Task task2 = new Task("t2", "d2", 2, TasksStatus.NEW);
-        taskManager.addTask(task2);
-        taskManager.getTask(2);
-
-        task1.setTasksStatus(TasksStatus.IN_PROGRESS);
-        taskManager.updateTask(task1);
-        taskManager.getTask(1);
-
-        task2.setTasksStatus(TasksStatus.DONE);
-        taskManager.updateTask(task2);
-        taskManager.getTask(2);
-
-        List<Task> historyTaskManager = taskManager.getHistory(); // вызываем историю уже после взаимодействия с тасками
-
-        assertNotEquals(historyTaskManager.get(0).getTasksStatus(), historyTaskManager.get(2).getTasksStatus());
-        assertNotEquals(historyTaskManager.get(1).getTasksStatus(), historyTaskManager.get(3).getTasksStatus());
+        assertEquals(11, historyTaskManager.size()); // проверяем что таск менеджер теперь не фиксированный
+        assertEquals(4, historyTaskManager.get(0).getId()); // здесь будет 1ый элемент
+        assertEquals(5, historyTaskManager.get(1).getId()); // и по аналогии
+        assertEquals(6, historyTaskManager.get(2).getId());
+        assertEquals(1, historyTaskManager.get(historyTaskManager.size() - 3).getId()); // этот тоже проверим
+        assertEquals(3, historyTaskManager.get(historyTaskManager.size() - 2).getId()); // предпоследний узел
+        assertEquals(2, historyTaskManager.get(historyTaskManager.size() - 1).getId()); // последний узел
     }
 
     @Test
@@ -204,5 +192,124 @@ public class InMemoryTaskManagerTest {
         // Проверяем, что статус Epic — IN_PROGRESS
         Epic updatedEpic = taskManager.getEpicTask(epic.getId());
         assertEquals(TasksStatus.IN_PROGRESS, updatedEpic.getTasksStatus());
+    }
+
+    @Test
+    public void shouldAddToHistory() {
+        HistoryManager historyManager = Managers.getDefaultHistory();
+
+        for (Task task : createTasksArray(11)) {
+            historyManager.add(task);
+        }
+
+        // добавляем дубликат задачи с id 1
+        historyManager.add(createTasksArray(11)[0]);
+
+        List<Task> history = historyManager.getHistory();
+
+        // размер останется 11, а не 12
+        assertEquals(11, history.size()); // проверяем что после добавления дубликата история не увеличилась
+
+        // теперь мы перезаписываем задачу с айди 1, тем самым удалив ноду старой, теперь задача с id 1 добавится в конец
+        assertEquals(1, history.get(0).getId()); // теперь задача с id 2 станет первой, т е сдвинется влево
+        assertEquals(0, history.get(history.size() - 1).getId()); // а задача с id 1 добавится в конец
+    }
+
+    @Test
+    public void shouldRemoveToHistory() {
+        HistoryManager historyManager = Managers.getDefaultHistory();
+
+        for (Task task : createTasksArray(11)) {
+            historyManager.add(task);
+        }
+
+        for (Task task : createTasksArray(11)) {
+            historyManager.remove(task.getId());
+        }
+
+        assertEquals(0, historyManager.getHistory().size()); // проверяем что все истории успешно удалились
+    }
+
+    @Test
+    public void shouldTasksIsEmpty() {
+        TaskManager taskManager = Managers.getDefault();
+
+        for (Epic epic : createEpicsArray(10)) {
+            taskManager.addEpicTask(epic);
+        }
+
+        for (SubTask subTask : createSubTasksArray(5, 1)) {
+            taskManager.addSubTask(subTask);
+        }
+
+        taskManager.removeAllTasks();
+        taskManager.removeAllEpics();
+        taskManager.removeAllSubTasks();
+
+        assertEquals(0, taskManager.getAllEpics().size());
+        assertEquals(0, taskManager.getAllSubTasks().size());
+        assertEquals(0, taskManager.getAllTasks().size());
+        assertEquals(0, taskManager.getHistory().size());
+    }
+
+    @Test
+    public void shouldNotAddIrrelevantSubTaskIdFromEpic() {
+        TaskManager taskManager = Managers.getDefault();
+        Epic[] epics = createEpicsArray(1);
+        taskManager.addEpicTask(epics[0]);
+        SubTask[] subTasks = createSubTasksArray(2, epics[0].getId());
+        taskManager.addSubTask(subTasks[0]);
+        taskManager.addSubTask(subTasks[1]);
+
+        assertEquals(List.of(subTasks[0].getId(), subTasks[1].getId()), epics[0].getSubTasks());
+        taskManager.removeSubTask(subTasks[0].getId()); // удаляем задачу по ее фактическому айди
+        assertEquals(List.of(subTasks[1].getId()), epics[0].getSubTasks());
+    }
+
+    @Test
+    public void shouldChangeIntoTaskNotInfluenceOnTaskManager() {
+        TaskManager taskManager = Managers.getDefault();
+        Task[] tasks = createTasksArray(2);
+        taskManager.addTask(tasks[0]);
+        taskManager.addTask(tasks[1]);
+        int firstTaskID = tasks[0].getId();
+        Task task1 = taskManager.getTask(1);
+        task1.setTasksStatus(TasksStatus.DONE);
+        assertEquals(taskManager.getTask(firstTaskID).getTasksStatus(), TasksStatus.NEW);
+    }
+
+    @Test
+    public void noNullException() {
+        HistoryManager historyManager = Managers.getDefaultHistory();
+        assertDoesNotThrow(() -> historyManager.add(null));
+        assertDoesNotThrow(() -> historyManager.remove(42));
+    }
+
+    private Epic[] createEpicsArray(int size) {
+        Epic[] epics = new Epic[size];
+        for (int i = 0; i < size; i++) {
+            Epic epic = new Epic("epic" + i, "d" + i, i, TasksStatus.NEW);
+            epics[i] = epic;
+        }
+        return epics;
+    }
+
+    private SubTask[] createSubTasksArray(int size, int epicId) {
+        SubTask[] subTasks = new SubTask[size];
+        for (int i = 0; i < size; i++) {
+            SubTask subTask = new SubTask("subTask" + (i + 1), "d" + (i + 1), 0, TasksStatus.NEW,
+                    epicId);
+            subTasks[i] = subTask;
+        }
+        return subTasks;
+    }
+
+    private Task[] createTasksArray(int size) {
+        Task[] tasks = new Task[size];
+        for (int i = 0; i < size; i++) {
+            Task t = new Task("t" + i, "d" + i, i, TasksStatus.NEW);
+            tasks[i] = t;
+        }
+        return tasks;
     }
 }

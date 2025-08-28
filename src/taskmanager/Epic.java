@@ -1,4 +1,4 @@
-package taskManager;// taskManager.Epic - большая задача, Subtask - подзадача
+package taskmanager;// taskManager.Epic - большая задача, Subtask - подзадача
 import java.util.ArrayList;
 
 public class Epic extends Task {
