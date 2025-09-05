@@ -29,25 +29,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
         save();
     }
 
-    public void save() {
-        try (FileWriter fw = new FileWriter("tasks.csv")) {
-            fw.write("id,type,name,status,description,epic" + "\n");
 
-            for (Task task : getAllTasks()) {
-                fw.write(toString(task) + "\n");
-            }
-
-            for (Epic epic : getAllEpics()) {
-                fw.write(toString(epic) + "\n");
-            }
-
-            for (SubTask subTask : getAllSubTasks()) {
-                fw.write(toString(subTask) + "\n");
-            }
-        } catch (IOException e) {
-            throw new ManagerSaveException(); // генерим непроверяемое исключение
-        }
-    }
 
     public static FileBackedTaskManager loadFromFile(File file) throws ManagerSaveException {
         FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager();
@@ -70,42 +52,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
             throw new ManagerSaveException();
         }
         return fileBackedTaskManager;
-    }
-
-    public String toString(Task task) {
-        if (task instanceof SubTask) {
-            return task.getId() + "," + task.getType() + "," + task.getNameTask()
-                    + "," + task.getTasksStatus() + "," + task.getDescription() + ","
-                    + ((SubTask) task).getEpicId();
-        }
-        return task.getId() + "," + task.getType() + "," + task.getNameTask()
-                + "," + task.getTasksStatus() + "," + task.getDescription();
-    }
-
-    public Task fromString(String value) {
-        // на вход пример - 1,TASK,Task1,NEW,Description task1,
-        String[] task = value.split(",");
-        String typeTask = task[1];
-        try {
-            switch (typeTask) {
-                case "TASK" -> {
-                    return new Task(task[2], task[4], Integer.parseInt(task[0]), TasksStatus.valueOf(task[3]));
-                }
-                case "EPIC" -> {
-                    return new Epic(task[2], task[4], Integer.parseInt(task[0]), TasksStatus.valueOf(task[3]));
-                }
-                case "SUBTASK" -> {
-                    return new SubTask(task[2], task[4], Integer.parseInt(task[0]), TasksStatus.valueOf(task[3]),
-                            Integer.parseInt(task[5]));
-                }
-            }
-        } catch (IllegalArgumentException e) {
-            System.out.println("Ошибка: статус задачи \"" + task[3] + "\" не найден среди допустимых значений.");
-        } catch (NullPointerException e) {
-            System.out.println("Ошибка: один из параметров оказался null.");
-            e.printStackTrace();
-        }
-        return null;
     }
 
     public static void main(String[] args) throws IOException {
@@ -153,5 +99,61 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
         System.out.println(fileBackTaskMng1.getAllTasks().size() == fileBackTaskMng2.getAllTasks().size());
         System.out.println(fileBackTaskMng1.getAllEpics().size() == fileBackTaskMng2.getAllEpics().size());
         System.out.println(fileBackTaskMng1.getAllSubTasks().size() == fileBackTaskMng2.getAllSubTasks().size());
+    }
+
+    private String toString(Task task) {
+        if (task instanceof SubTask) {
+            return task.getId() + "," + task.getType() + "," + task.getNameTask()
+                    + "," + task.getTasksStatus() + "," + task.getDescription() + ","
+                    + ((SubTask) task).getEpicId();
+        }
+        return task.getId() + "," + task.getType() + "," + task.getNameTask()
+                + "," + task.getTasksStatus() + "," + task.getDescription();
+    }
+
+    private Task fromString(String value) {
+        // на вход пример - 1,TASK,Task1,NEW,Description task1,
+        String[] task = value.split(",");
+        String typeTask = task[1];
+        try {
+            switch (typeTask) {
+                case "TASK" -> {
+                    return new Task(task[2], task[4], Integer.parseInt(task[0]), TasksStatus.valueOf(task[3]));
+                }
+                case "EPIC" -> {
+                    return new Epic(task[2], task[4], Integer.parseInt(task[0]), TasksStatus.valueOf(task[3]));
+                }
+                case "SUBTASK" -> {
+                    return new SubTask(task[2], task[4], Integer.parseInt(task[0]), TasksStatus.valueOf(task[3]),
+                            Integer.parseInt(task[5]));
+                }
+            }
+        } catch (IllegalArgumentException e) {
+            System.out.println("Ошибка: статус задачи \"" + task[3] + "\" не найден среди допустимых значений.");
+        } catch (NullPointerException e) {
+            System.out.println("Ошибка: один из параметров оказался null.");
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private void save() {
+        try (FileWriter fw = new FileWriter("tasks.csv")) {
+            fw.write("id,type,name,status,description,epic" + "\n");
+
+            for (Task task : getAllTasks()) {
+                fw.write(toString(task) + "\n");
+            }
+
+            for (Epic epic : getAllEpics()) {
+                fw.write(toString(epic) + "\n");
+            }
+
+            for (SubTask subTask : getAllSubTasks()) {
+                fw.write(toString(subTask) + "\n");
+            }
+        } catch (IOException e) {
+            throw new ManagerSaveException(); // генерим непроверяемое исключение
+        }
     }
 }

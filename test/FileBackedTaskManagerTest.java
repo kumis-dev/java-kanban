@@ -21,9 +21,22 @@ public class FileBackedTaskManagerTest {
 
     @Test
     public void saveEmptyFile() throws IOException {
-        Files.createTempFile("test_", ".txt"); // принимает имя файла и расширение
-        fileBackedTaskManager.save();
+        Files.createTempFile("tasks_", ".csv"); // принимает имя файла и расширение
+        // тестируем fileBackedTaskManager.save() через методы в которых он есть, сохраняя приватность save
+        Task task = new Task("t", "d", 1, TasksStatus.NEW);
+        fileBackedTaskManager.addTask(task);
+        fileBackedTaskManager.removeTask(task.getId());
+        Epic epic = new Epic("e", "d", 2, TasksStatus.NEW);
+        SubTask subTask = new SubTask("st", "d", 3, TasksStatus.NEW, 2);
+        fileBackedTaskManager.addEpicTask(epic);
+        fileBackedTaskManager.removeEpicTask(epic.getId());
+        fileBackedTaskManager.addSubTask(subTask);
+        fileBackedTaskManager.removeSubTask(subTask.getId());
+
         assertTrue(Files.exists(Paths.get("tasks.csv")));
+        assertTrue(fileBackedTaskManager.getAllTasks().isEmpty());
+        assertTrue(fileBackedTaskManager.getAllEpics().isEmpty());
+        assertTrue(fileBackedTaskManager.getAllSubTasks().isEmpty());
     }
 
     @Test
@@ -52,7 +65,6 @@ public class FileBackedTaskManagerTest {
         fileBackedTaskManager.addEpicTask(epics[2]);
         fileBackedTaskManager.addEpicTask(epics[1]);
         fileBackedTaskManager.addTask(tasks[1]);
-        fileBackedTaskManager.save();
         assertEquals(fileBackedTaskManager.getAllTasks().size(), 3);
         assertEquals(fileBackedTaskManager.getAllEpics().size(), 3);
         assertEquals(fileBackedTaskManager.getAllSubTasks().size(), 3);
@@ -75,7 +87,6 @@ public class FileBackedTaskManagerTest {
         fileBackedTaskManager2.addEpicTask(epics[2]);
         fileBackedTaskManager2.addEpicTask(epics[1]);
         fileBackedTaskManager2.addTask(tasks[1]);
-        fileBackedTaskManager2.save();
 
         // загружаем из файла в новый объект !!!
         fileBackedTaskManager2 = FileBackedTaskManager.loadFromFile(Paths.get("tasks.csv").toFile());
