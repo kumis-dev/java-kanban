@@ -285,7 +285,7 @@ public class InMemoryTaskManagerTest {
         assertDoesNotThrow(() -> historyManager.remove(42));
     }
 
-    private Epic[] createEpicsArray(int size) {
+    public Epic[] createEpicsArray(int size) {
         Epic[] epics = new Epic[size];
         for (int i = 0; i < size; i++) {
             Epic epic = new Epic("epic" + i, "d" + i, i, TasksStatus.NEW);
@@ -294,7 +294,7 @@ public class InMemoryTaskManagerTest {
         return epics;
     }
 
-    private SubTask[] createSubTasksArray(int size, int epicId) {
+    public SubTask[] createSubTasksArray(int size, int epicId) {
         SubTask[] subTasks = new SubTask[size];
         for (int i = 0; i < size; i++) {
             SubTask subTask = new SubTask("subTask" + (i + 1), "d" + (i + 1), 0, TasksStatus.NEW,
@@ -304,7 +304,7 @@ public class InMemoryTaskManagerTest {
         return subTasks;
     }
 
-    private Task[] createTasksArray(int size) {
+    public Task[] createTasksArray(int size) {
         Task[] tasks = new Task[size];
         for (int i = 0; i < size; i++) {
             Task t = new Task("t" + i, "d" + i, i, TasksStatus.NEW);
