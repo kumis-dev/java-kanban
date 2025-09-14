@@ -1,4 +1,8 @@
-package taskmanager;
+package taskmanager.taskservice;
+
+import taskmanager.HistoryManager;
+import taskmanager.Managers;
+import taskmanager.TaskManager;
 
 // класс для реализации пользовательского сценария (доп тз)
 public class Main {

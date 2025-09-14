@@ -1,11 +1,16 @@
 package taskmanager;
 
+import taskmanager.taskservice.Epic;
+import taskmanager.taskservice.SubTask;
+import taskmanager.taskservice.Task;
+
 import java.util.List;
+import java.util.Optional;
 
 public interface TaskManager {
     void addTask(Task task);
 
-    Task getTask(int taskId);
+    Optional<Task> getTask(int taskId);
 
     List<Task> getAllTasks();
 
@@ -37,9 +42,9 @@ public interface TaskManager {
 
     void updateSubTask(SubTask subTask);
 
-    SubTask getSubTask(int subTaskId);
+    Optional<SubTask> getSubTask(int subTaskId);
 
-    Epic getEpicTask(int epicTaskId);
+    Optional<Epic> getEpicTask(int epicTaskId);
 
     List<Task> getHistory();
 }
