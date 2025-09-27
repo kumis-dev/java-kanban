@@ -8,20 +8,24 @@ import java.util.List;
 public class Epic extends Task {
     // епик всегда один - и он уникален
     // создадим список subTasks класса taskManager.Epic
-    private final ArrayList<Integer> subTasks = new ArrayList<>(); // создаем список уникальных id больших задач
-    private LocalDateTime endTime;        // максимальный endTime сабтасков
-
-    @Override
-    public LocalDateTime getEndTime() {
-        return endTime; // просто возвращаем расчетное время, расчитывать его будем в таск менеджере
-    }
+    private ArrayList<Integer> subTasks = new ArrayList<>(); // создаем список уникальных id больших задач
 
     public List<Integer> getSubTasks() {
+        if (subTasks == null) {
+            subTasks = new ArrayList<>();
+        }
         return subTasks;
     }
 
     public Epic(String nameTask, String description, int id, TasksStatus tasksStatus) {
         super(nameTask, description, id, tasksStatus);
+    }
+
+    private LocalDateTime endTime;        // максимальный endTime сабтасков
+
+    @Override
+    public LocalDateTime getEndTime() {
+        return endTime; // просто возвращаем расчетное время, расчитывать его будем в таск менеджере
     }
 
     public Epic(String nameTask, String description, int id, TasksStatus tasksStatus, Duration duration,
