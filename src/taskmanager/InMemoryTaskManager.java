@@ -109,7 +109,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void updateTask(Task task) throws NotFoundException{
+    public void updateTask(Task task) throws NotFoundException {
         Task oldTask = tasks.get(task.getId());
         if (oldTask != null && oldTask.getStartTime() != null)
             prioritizedTasks.remove(oldTask); // снимаем старую задачу
