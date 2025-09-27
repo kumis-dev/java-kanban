@@ -9,7 +9,7 @@ import taskmanager.TaskManager;
 import taskmanager.http.handlers.*;
 
 public class HttpTaskServer {
-    public final static int PORT = 8080;
+    public static final int PORT = 8080;
     private final HttpServer httpServer;
 
     public HttpTaskServer(TaskManager taskManager) throws IOException {
