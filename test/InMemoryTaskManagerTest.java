@@ -1,5 +1,6 @@
 import org.junit.jupiter.api.Test;
 import taskmanager.*;
+import taskmanager.exceptions.OverlapException;
 import taskmanager.taskservice.Epic;
 import taskmanager.taskservice.SubTask;
 import taskmanager.taskservice.Task;
@@ -60,8 +61,13 @@ public class InMemoryTaskManagerTest extends TaskManagerTest {
         Task task2 = new Task("постирать", "красные вещи", 2, TasksStatus.NEW,
                 Duration.ofMinutes(30),
                 LocalDateTime.of(2025, 9, 15, 10, 30));
-        tm.addTask(task1);
-        tm.addTask(task2); // не должен быть добавлен т к пересекается
+        try {
+            tm.addTask(task1);
+            tm.addTask(task2); // не должен быть добавлен т к пересекается
+        } catch (OverlapException e) {
+
+        }
+
         assertEquals(1, tm.getAllTasks().size());
     }
 
@@ -105,8 +111,12 @@ public class InMemoryTaskManagerTest extends TaskManagerTest {
                 6, TasksStatus.NEW, halfHour,
                 LocalDateTime.of(2025, 9, 15, 10, 30), epic1.getId());
         tm.addEpicTask(epic1);
-        tm.addSubTask(subTask1);
-        tm.addSubTask(subTask2); // не должен быть добавлен т к пересекается
+        try {
+            tm.addSubTask(subTask1);
+            tm.addSubTask(subTask2); // не должен быть добавлен т к пересекается
+        } catch (OverlapException e) {
+
+        }
         assertEquals(1, tm.getAllSubTasks().size());
     }
 }
