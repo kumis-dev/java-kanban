@@ -11,7 +11,6 @@ import java.io.IOException;
 
 public class HistoryHandler extends BaseHttpHandler implements HttpHandler {
     private TaskManager taskManager;
-    // надо сделать с приоритетными задачами теперь
 
 
     public HistoryHandler(TaskManager taskManager) {

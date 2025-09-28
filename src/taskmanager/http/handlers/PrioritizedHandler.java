@@ -10,7 +10,6 @@ import java.io.IOException;
 
 public class PrioritizedHandler extends BaseHttpHandler implements HttpHandler {
     private TaskManager taskManager;
-    // надо сделать с приоритетными задачами теперь
 
     public PrioritizedHandler(TaskManager taskManager) {
         this.taskManager = taskManager;
