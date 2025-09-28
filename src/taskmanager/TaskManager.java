@@ -1,5 +1,6 @@
 package taskmanager;
 
+import taskmanager.exceptions.NotFoundException;
 import taskmanager.taskservice.Epic;
 import taskmanager.taskservice.SubTask;
 import taskmanager.taskservice.Task;
@@ -20,15 +21,15 @@ public interface TaskManager {
 
     List<SubTask> getEpicSubtasks(int epicId);
 
-    void removeTask(int taskId);
+    void removeTask(int taskId) throws NotFoundException;
 
     void removeAllTasks();
 
-    void updateTask(Task task);
+    void updateTask(Task task) throws NotFoundException;
 
     void addEpicTask(Epic epic);
 
-    void removeEpicTask(int epicTaskId);
+    void removeEpicTask(int epicTaskId) throws NotFoundException;
 
     void removeAllEpics();
 
@@ -36,7 +37,7 @@ public interface TaskManager {
 
     void addSubTask(SubTask subTask);
 
-    void removeSubTask(int subTaskId);
+    void removeSubTask(int subTaskId) throws NotFoundException;
 
     void updateEpic(Epic epic);
 
@@ -45,6 +46,8 @@ public interface TaskManager {
     Optional<SubTask> getSubTask(int subTaskId);
 
     Optional<Epic> getEpicTask(int epicTaskId);
+
+    List<Task> getPrioritizedTasks();
 
     List<Task> getHistory();
 }

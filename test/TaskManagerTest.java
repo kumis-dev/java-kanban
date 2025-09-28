@@ -2,6 +2,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import taskmanager.Managers;
 import taskmanager.TaskManager;
+import taskmanager.exceptions.NotFoundException;
 import taskmanager.taskservice.Epic;
 import taskmanager.taskservice.SubTask;
 import taskmanager.taskservice.Task;
@@ -126,7 +127,7 @@ public abstract class TaskManagerTest {
         TaskManager taskManager = Managers.getDefault();
 
         // попытка удаления эпика, которого нет
-        assertDoesNotThrow(() -> taskManager.removeEpicTask(999));
+        assertThrows(NotFoundException.class, () -> taskManager.removeEpicTask(888));
     }
 
     @Test
@@ -134,7 +135,7 @@ public abstract class TaskManagerTest {
         TaskManager taskManager = Managers.getDefault();
 
         // попытка удаления саб таска, которого нет
-        assertDoesNotThrow(() -> taskManager.removeSubTask(777));
+        assertThrows(NotFoundException.class, () -> taskManager.removeSubTask(888));
     }
 
     @Test
@@ -142,7 +143,7 @@ public abstract class TaskManagerTest {
         TaskManager taskManager = Managers.getDefault();
 
         // попытка удаления таска, которого нет
-        assertDoesNotThrow(() -> taskManager.removeTask(888));
+        assertThrows(NotFoundException.class, () -> taskManager.removeTask(888));
     }
 
     @Test

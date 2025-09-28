@@ -67,22 +67,34 @@ public class FileBackedTaskManagerTest {
     @Test
     public void saveEmptyFile() throws IOException {
         Files.createTempFile("tasks_", ".csv"); // принимает имя файла и расширение
-        // тестируем fileBackedTaskManager.save() через методы в которых он есть, сохраняя приватность save
+
+        // добавляем и удаляем Task
         Task task = createTimeTasksArray(1)[0];
         fileBackedTaskManager.addTask(task);
         fileBackedTaskManager.removeTask(task.getId());
+
+        // добавляем Epic
         Epic epic = createTimeEpicsArray(1)[0];
-        SubTask subTask = createTimeSubTasksArray(1, epic.getId())[0];
         fileBackedTaskManager.addEpicTask(epic);
-        fileBackedTaskManager.removeEpicTask(epic.getId());
+
+        // берём реальный id добавленного эпика
+        int epicId = fileBackedTaskManager.getAllEpics().get(0).getId();
+
+        // создаём SubTask уже с правильным epicId
+        SubTask subTask = createTimeSubTasksArray(1, epicId)[0];
         fileBackedTaskManager.addSubTask(subTask);
         fileBackedTaskManager.removeSubTask(subTask.getId());
 
+        // теперь можно удалить и сам эпик
+        fileBackedTaskManager.removeEpicTask(epicId);
+
+        // проверяем файл и пустое состояние менеджера
         assertTrue(Files.exists(Paths.get("tasks.csv")));
         assertTrue(fileBackedTaskManager.getAllTasks().isEmpty());
         assertTrue(fileBackedTaskManager.getAllEpics().isEmpty());
         assertTrue(fileBackedTaskManager.getAllSubTasks().isEmpty());
     }
+
 
     @Test
     public void loadEmptyFile() throws IOException {
@@ -115,7 +127,8 @@ public class FileBackedTaskManagerTest {
         Epic[] epics = createTimeEpicsArray(3);
         FileBackedTaskManager fileBackedTaskManager2 = new FileBackedTaskManager();
         for (Epic e : epics) fileBackedTaskManager2.addEpicTask(e);
-        SubTask[] subTasks = createTimeSubTasksArray(3, epics[2].getId());
+        int epicId = fileBackedTaskManager2.getAllEpics().get(2).getId();
+        SubTask[] subTasks = createTimeSubTasksArray(3, epicId);
         for (SubTask s : subTasks) fileBackedTaskManager2.addSubTask(s);
         for (Task t : tasks)  fileBackedTaskManager2.addTask(t);
 
